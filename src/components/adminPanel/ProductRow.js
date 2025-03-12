@@ -6,15 +6,13 @@ import { setLoading } from "@/redux/features/loadingSlice";
 import { CiEdit } from 'react-icons/ci';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import axios from 'axios';
-import { removeProduct, setProduct } from '@/redux/features/productSlice';
+import { removeProduct, setProduct, updateProduct } from '@/redux/features/productSlice';
 import { makeToast } from '../../../utils/helpers';
 
-const ProductRow = ({ product, srNo, setOpenPopup,setUpdateTable,setPopupType,PopupType}) => {
+const ProductRow = ({ product, srNo, setOpenPopup,setUpdateTable,setPopupType,PopupType,setProductToUpdate}) => {
   const dispatch = useDispatch();
-
   const handleEdit = () => {
-    dispatch(setProduct(product))
-  
+    setProductToUpdate(product)
     // Handle opening the edit popup/mod  al
     setPopupType('update')
     setOpenPopup(true);
@@ -27,7 +25,7 @@ const ProductRow = ({ product, srNo, setOpenPopup,setUpdateTable,setPopupType,Po
     dispatch(setLoading(true)); // Set loading state
   
     try {
-      const res = await axios.delete(`/api/removeProduct/${product._id}`);
+      const res = await axios.delete(`/api/products/removeProduct/${product._id}`);
   
       if (res.status === 200 && res.data.success) {
         makeToast(`"${product.name}" has been deleted successfully!`)
@@ -53,8 +51,8 @@ const ProductRow = ({ product, srNo, setOpenPopup,setUpdateTable,setPopupType,Po
       <td className="px-4 py-2">{srNo}</td>
       <td className="px-4 py-2">{product.name}</td>
       <td className="px-4 py-2">${product.price.toFixed(2)}</td>
-      <td className="px-4 py-2">{product.category || 'N/A'}</td>
-      <td className="px-4 py-2">{product.brand || 'N/A'}</td>
+      <td className="px-4 py-2">{product.category.name || 'N/A'}</td>
+      <td className="px-4 py-2">{product.brand?.name || 'N/A'}</td>
       <td className="px-4 py-2">
       <div className="flex items-center gap-2">
         {product.images && product.images.length > 0 ? (

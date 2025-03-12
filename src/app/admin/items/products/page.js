@@ -7,19 +7,21 @@ import ProductRow from '@/components/adminPanel/ProductRow';
 import PopupProductUpdate from '@/components/adminPanel/PopupProductUpdate';
 import PoppupProductInsert from '@/components/adminPanel/PoppupProductInsert';
 
-
 const ProductsPage = () => {
   const [products, setProducts] = useState([]); // Store products
   const [openPopup, setOpenPopup] = useState(false); // Handle modal visibility
-  const [popupType, setPopupType] = useState('')
+  const [popupType, setPopupType] = useState('');
+  const [productToUpdate, setProductToUpdate] = useState(null);
   const [updateTable, setUpdateTable] = useState(false); // Refresh table state
-  
+
   const dispatch = useDispatch();
+
   useEffect(() => {
+
     const fetchProducts = async () => {
       dispatch(setLoading(true));
       try {
-        const response = await axios.get("/api/get_products");
+        const response = await axios.get("/api/products/get_products");
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -28,34 +30,34 @@ const ProductsPage = () => {
       }
     };
     fetchProducts();
-  }, [updateTable]); 
+  }, [updateTable, dispatch]);
 
   return (
-    <div className="bg-white h-[calc(100vh-96px)] rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-3xl font-bold">All Products</h2>
-        <button 
-          className="bg-blue-500 text-blue px-4 py-2 rounded hover:bg-blue-600"
+    <div className="bg-white h-[calc(100vh-96px)] rounded-lg p-6 shadow-sm">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">All Products</h2>
+        <button
+          className="bg-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           onClick={() => {
-            setPopupType('insert')
+            setPopupType('insert');
             setOpenPopup(true);
           }}
         >
           Add Product
         </button>
       </div>
-      
+
       <div className="h-[calc(100vh-180px)] overflow-y-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="text-gray-500 bg-gray-100">
-              <th className="border border-gray-200 px-4 py-2">SR No.</th>
-              <th className="border border-gray-200 px-4 py-2">Name</th>
-              <th className="border border-gray-200 px-4 py-2">Price</th>
-              <th className="border border-gray-200 px-4 py-2">Category</th>
-              <th className="border border-gray-200 px-4 py-2">Brand</th>
-              <th className="border border-gray-200 px-4 py-2">Picture</th>
-              <th className="border border-gray-200 px-4 py-2">Actions</th>
+            <tr className="bg-gray-100 text-gray-600">
+              <th className="border border-gray-200 px-4 py-3 text-left">SR No.</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Name</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Price</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Category</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Brand</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Picture</th>
+              <th className="border border-gray-200 px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -68,30 +70,32 @@ const ProductsPage = () => {
                 setUpdateTable={setUpdateTable}
                 product={product}
                 setPopupType={setPopupType}
+                setProductToUpdate={setProductToUpdate}
+                productToUpdate={productToUpdate}
               />
-            ))} 
+            ))}
           </tbody>
         </table>
       </div>
 
-      {openPopup && popupType=='update'  && (
-        <PopupProductUpdate 
-          setOpenPopup={setOpenPopup} 
+      {openPopup && popupType === 'update' && (
+        <PopupProductUpdate
+          setOpenPopup={setOpenPopup}
           setUpdateTable={setUpdateTable}
           setPopupType={setPopupType}
           popupType={popupType}
-
+          productToUpdate={productToUpdate}
         />
       )}
-      {openPopup && popupType=='insert'  && (
-        <PoppupProductInsert 
-          setOpenPopup={setOpenPopup} 
+
+      {openPopup && popupType === 'insert' && (
+        <PoppupProductInsert
+          setOpenPopup={setOpenPopup}
           setUpdateTable={setUpdateTable}
           setPopupType={setPopupType}
           popupType={popupType}
         />
       )}
-
     </div>
   );
 };

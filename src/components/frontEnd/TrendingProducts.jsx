@@ -8,7 +8,7 @@ const TrendingProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("/api/get_products");
+        const response = await axios.get("/api/products/get_products");
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -17,6 +17,7 @@ const TrendingProducts = () => {
 
     fetchProducts();
   }, []);
+  console.log(products);
 
   return (
     <div className="container relative"> {/* Added relative positioning */}
@@ -36,7 +37,7 @@ const TrendingProducts = () => {
             key={item._id}
             id={item._id}
             img={item.images[0]?.url || ''}
-            category={item.category}
+            category={item.category.name}
             title={item.name}
             price={item.price}
           />

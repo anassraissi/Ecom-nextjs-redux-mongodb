@@ -5,7 +5,6 @@ import { IncomingForm } from "formidable"; // Named import for IncomingForm
 import { Readable } from "stream";
 import dbConnect from "@/libs/models/dbConnect";
 import Product from "@/libs/models/Product";
-
 export const config = {
   api: {
     bodyParser: false, // Disable Next.js default body parsing for file uploads
@@ -64,71 +63,50 @@ export async function POST(req) {
       });
     });
 
-    // // 7. Log parsed data for debugging
-    // console.log("Parsed Fields:", formData.fields);
-    // console.log("Parsed Files:", formData.files);
+    // 7. Log parsed data for debugging
+    console.log("Parsed Fields:", formData.fields);
+    console.log("Parsed Files:", formData.files);
 
     const { fields, files } = formData;
+    const { productId, color } = fields;
 
-    // Extract single values from arrays
-    const name = fields.name?.[0] || "";
-    const description = fields.description?.[0] || "";
-    const price = fields.price?.[0] ? Number(fields.price[0]) : 0;
-    const discountPrice = fields.discountPrice?.[0] ? Number(fields.discountPrice[0]) : 0;
-    const stock = fields.stock?.[0] ? Number(fields.stock[0]) : 0;
-    const category = fields.category?.[0] || "";
-    const brand = fields.brand?.[0] || "";
-    const tags = fields.tags?.[0] ? fields.tags[0].split(",") : [];
-    const imageColors = fields.imageColors?.[0] || "";
-    
     // 8. Validate required fields
-    if (!name || !price || !category || !description || !tags||!discountPrice || !stock||  !brand||  !files.images) {
+    if (!productId || !color || !files.image) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
+
     // 9. Process the uploaded file (assume files.image is an array)
-    const file = files.images[0];// Correct file reference
-    const fileName = file.newFilename; // Get the correct new file name
+    const file = files.image[0];
+    const fileName = `${Date.now()}-${file.originalFilename}`;
     const destination = path.join(process.cwd(), "public/images/products", fileName);
-    
+
     // Move the file from the temporary location to our public folder
     await fs.rename(file.filepath, destination);
-    
-    // Create a new image object
+
+    // 10. Create a new image object
     const newImage = {
-      url: fileName, // Ensure the correct relative path
-      altText: `Product Image for ${name}`,
-      color: imageColors || null, // Ensure color is optional
+      url: fileName, // URL relative to the public folder
+      color:color[0],
     };
-    
-    console.log(newImage);
-    // 11. Create a new product object
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      discountPrice,
-      stock,
-      category,
-      tags,
-      brand,
-      images: [newImage], // Ensure images is an array
-    });
-    
-    
 
-    // 12. Save the new product to the database
-    await newProduct.save();
+    // 11. Update the product document in MongoDB by appending the new image
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { $push: { images: newImage } },
+      { new: true }
+    );
 
-    // 13. Return a success response with the new product
+    if (!updatedProduct) {
+      return NextResponse.json({ message: "Product not found" }, { status: 404 });
+    }
+
+    // 12. Return a success response with the new image
     return NextResponse.json(
-      { message: "Product created successfully", product: newProduct },
-      { status: 201 }
+      { message: "Image uploaded successfully", image: updatedProduct.images.at(-1) },
+      { status: 200 }
     );
   } catch (error) {
     console.error("An unexpected error occurred:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
-
-
-

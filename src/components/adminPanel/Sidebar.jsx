@@ -20,18 +20,20 @@ const Sidebar = () => {
       href: "/admin/dashboard",
     },
     {
-      title: "crudOnItmes",
+      title: "Manages Containers",
       icon: <RiShoppingCartLine />,
       href: "#",
       hasSubMenu: true,
       subMenu: [
         { title: "Products", href: "/admin/items/products" },
+        { title: "Categories", href: "/admin/items/categories" },
+        { title: "Brands", href: "/admin/items/brands" },
       ],
     },
     {
       title: "Account",
       icon: <MdManageAccounts />,
-      href: "",
+      href: "/admin/users",
     },
     {
       title: "Transactions",

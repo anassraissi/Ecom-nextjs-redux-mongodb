@@ -14,7 +14,7 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   dbConnect();
-  await initializeDummyData();
+  // await initializeDummyData();
   return (
     <html lang="en">
       <body>
