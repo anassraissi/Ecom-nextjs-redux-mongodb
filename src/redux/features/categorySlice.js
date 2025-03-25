@@ -1,15 +1,30 @@
-// src/redux/slices/categorySlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
+  categories: [], // Add categories array
   _id: '',
   name: '',
   description: '',
   imageUrl: '',
-  parent: null, // Assuming parent is ObjectId or null
+  parent: null,
   createdAt: null,
   updatedAt: null,
+  loading: false, // Add loading state
+  error: null, // Add error state
 };
+
+export const fetchCategories = createAsyncThunk(
+  'categorySlice/fetchCategories',
+  async () => {
+    try {
+      const response = await axios.get('/api/category/getCategories'); // Assuming you have an endpoint for categories
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 export const categorySlice = createSlice({
   name: 'categorySlice',
@@ -28,8 +43,23 @@ export const categorySlice = createSlice({
       return initialState;
     },
     removeCategory: () => {
-      return initialState; // Reset to initial state when a category is removed
+      return initialState;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
   },
 });
 
@@ -37,7 +67,7 @@ export const {
   setCategory,
   updateCategory,
   resetCategory,
-  removeCategory, // Export the new action
+  removeCategory,
 } = categorySlice.actions;
 
 export default categorySlice.reducer;

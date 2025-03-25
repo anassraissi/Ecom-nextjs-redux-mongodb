@@ -1,97 +1,121 @@
-import { AiFillStar, AiOutlineStar, AiOutlineShoppingCart } from "react-icons/ai";
+import { AiFillStar, AiOutlineStar, AiOutlineShoppingCart, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import toast from "react-hot-toast";
 import { useAppDispatch } from "@/redux/hooks";
 import { addToCart } from "@/redux/features/cartSlice";
-import { useState } from "react";
-import Image from "next/image"; // Import the Next.js Image component
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { fetchReviews } from "@/redux/features/reviewSlice";
 
-const ProductCard = ({ id, img, category, title, price }) => {
-  const dispatch = useAppDispatch();
-  const [quantity, setQuantity] = useState(1);
+const ProductCard = ({ id, img, category, title, price, discountPrice }) => {
+    const dispatch = useAppDispatch();
+    const [isLiked, setIsLiked] = useState(false);
+    const [stars, setStars] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
 
-  const addProductToCart = () => {
-    if (quantity > 0) {
-      const payload = { id, img, category, title, price, quantity };
-      dispatch(addToCart(payload));
-      toast.success("Added to Cart!");
-    } else {
-      toast.error("Quantity must be greater than 0.");
-    }
-  };
+    useEffect(() => {
+        dispatch(fetchReviews(id));
+    }, [dispatch, id]);
 
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-      {/* Product Image */}
-      <div className="relative h-72 w-full">
-        <Image
-          src={`/images/products/${img}`}
-          alt={title}
-          layout="fill"
-          objectFit="cover"
-          className="rounded-t-lg"
-        />
-      </div>
+    const { reviews} = useSelector((state) => state.reviews);
 
-      {/* Product Details */}
-      <div className="p-6">
-        {/* Category */}
-        <p className="text-gray-500 text-sm uppercase tracking-wider mb-2">
-          {category}
-        </p>
+    useEffect(() => {
+        if (reviews) {
+            const productReviews = reviews.filter((review) => review.product === id);
+            if (productReviews.length === 0) {
+                setAverageRating(0);
+                setStars([...stars]);
+                return;
+            }
+            
+            const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
+            const avgRating = totalRating / productReviews.length;
+            setAverageRating(avgRating);
+            setStars(renderStars(avgRating));
+        }
+    }, [reviews, id]);
 
-        {/* Title */}
-        <h2 className="font-semibold text-xl mb-3 line-clamp-2 hover:text-blue-600 transition-colors">
-          {title}
-        </h2>
+    const addProductToCart = (e) => {
+        e.stopPropagation();
+        const payload = { id, img, category, title, price, quantity: 1 };
+        dispatch(addToCart(payload));
+        toast.success("Added to Cart!");
+    };
 
-        {/* Rating */}
-        <div className="flex items-center mb-4">
-          {[...Array(4)].map((_, i) => (
-            <AiFillStar key={i} className="text-[#FFB21D] text-lg" />
-          ))}
-          <AiOutlineStar className="text-[#FFB21D] text-lg" />
-          <p className="text-gray-600 text-sm ml-2">(3 Reviews)</p>
+    const toggleLike = (e) => {
+        e.stopPropagation();
+        setIsLiked(!isLiked);
+    };
+
+    const renderStars = (rating) => {
+        const filledStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        const emptyStars = 5 - Math.ceil(rating);
+
+        const stars = [];
+
+        for (let i = 0; i < filledStars; i++) {
+            stars.push(<AiFillStar key={`filled-${i}`} className="text-[#FFB21D] text-sm" />);
+        }
+
+        if (hasHalfStar) {
+            //If you want to add half star add half star icon.
+            //stars.push(<AiFillHalfStar key="half" className="text-[#FFB21D] text-sm" />);
+        }
+
+        for (let i = 0; i < emptyStars; i++) {
+            stars.push(<AiOutlineStar key={`empty-${i}`} className="text-[#FFB21D] text-sm" />);
+        }
+
+        return stars;
+    };
+
+    return (
+        <div className="border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+            <div className="relative">
+                <Link href={`/product/${id}`} key={id} className="block">
+                    <div className="relative h-48 w-full">
+                        <Image
+                            src={`/images/products/${img}`}
+                            alt={title}
+                            layout="fill"
+                            objectFit="contain"
+                            objectPosition="center"
+                            className="rounded-t-lg"
+                        />
+                    </div>
+                    <div className="p-3">
+                        <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">
+                            {category}
+                        </p>
+                        <h2 className="font-semibold text-sm mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
+                            {title}
+                        </h2>
+                        <div className="flex items-center mb-2">
+                            {stars}
+                        </div>
+                        <div className="flex items-center">
+                            <p className="font-bold text-red-600 text-lg mr-2">${discountPrice}</p>
+                            <p className="text-black text-xs line-through">${price}</p>
+                        </div>
+                    </div>
+                </Link>
+                <button
+                    onClick={addProductToCart}
+                    className="absolute top-2 right-2 bg-blue text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+                >
+                    <AiOutlineShoppingCart className="text-lg" />
+                </button>
+                <button
+                    onClick={toggleLike}
+                    className="absolute top-2 left-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                >
+                    {isLiked ? <AiFillHeart className="text-lg" /> : <AiOutlineHeart className="text-lg" />}
+                </button>
+            </div>
         </div>
-
-        {/* Price and Quantity Controls */}
-        <div className="flex justify-between items-center">
-          {/* Price */}
-          <p className="font-bold text-2xl text-blue-600">${price}</p>
-
-          {/* Quantity Controls */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        {/* Add to Cart Button */}
-        <button
-          onClick={addProductToCart}
-          className="w-full mt-6 bg-blue text-white py-3 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
-        >
-          <AiOutlineShoppingCart className="mr-2 text-lg" />
-          Add To Cart
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ProductCard;

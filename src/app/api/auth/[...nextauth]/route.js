@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import dbConnect from "@/libs/models/dbConnect";
 import User from "@/libs/models/User";
+import dbConnect from "@/libs/models/dbConnect";
 
 export const authOptions = {
     providers: [
@@ -20,7 +20,6 @@ export const authOptions = {
                     const newUser = new User({
                         name: user.name,
                         email: user.email,
-                        password: user.email, // Using email as password for Google login
                     });
                     await newUser.save();
                     console.log("Created new user:", newUser);
@@ -28,11 +27,19 @@ export const authOptions = {
                     console.log("User already exists:", existingUser);
                 }
 
-                return true; // Allow sign in
+                return true;
             } catch (error) {
                 console.error("Error in signIn callback:", error);
-                return false; // Prevent sign in
+                return false;
             }
+        },
+        async session({ session, token }) {
+            await dbConnect();
+            const user = await User.findOne({ email: session?.user?.email });
+            if (user) {
+                session.user.id = user._id.toString();
+            }
+            return session;
         },
     },
     secret: process.env.NEXTAUTH_SECRET,

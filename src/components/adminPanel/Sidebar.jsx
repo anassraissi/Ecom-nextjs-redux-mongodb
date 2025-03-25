@@ -28,6 +28,7 @@ const Sidebar = () => {
         { title: "Products", href: "/admin/items/products" },
         { title: "Categories", href: "/admin/items/categories" },
         { title: "Brands", href: "/admin/items/brands" },
+        { title: "Sales", href: "/admin/items/sales" },
       ],
     },
     {

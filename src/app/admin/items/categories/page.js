@@ -32,7 +32,7 @@ function CategoryList() {
       }
     }
     fetchCategories();
-  },[]);
+  },[updateTable]);
 
   const openModal = () => setOpenPopup(true);
 

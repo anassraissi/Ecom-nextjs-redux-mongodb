@@ -1,58 +1,39 @@
-// src/components/BrandList.js
 'use client';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import BrandInsertModal from '@/components/adminPanel/BrandInsertModal'; // Assuming you have this component
-import BrandUpdateModal from '@/components/adminPanel/BrandUpdateModal'; // Assuming you have this component
+import BrandInsertModal from '@/components/adminPanel/BrandInsertModal';
+import BrandUpdateModal from '@/components/adminPanel/BrandUpdateModal';
 import { makeToast } from '../../../../../utils/helpers';
-import { removeBrand, setBrand } from '@/redux/features/brandSlice';
-
+import { fetchBrands,removeBrand } from '@/redux/features/brandSlice';
 
 function BrandList() {
+
   const dispatch = useDispatch();
-  const brand = useSelector((state) => state.brandSlice); // Select from brandSlice
-  const [brands, setBrands] = useState();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { brands, loading, error } = useSelector((state) => state.brands);
+
   const [openPopup, setOpenPopup] = useState(false);
   const [updateTable, setUpdateTable] = useState(false);
   const [brandToUpdate, setBrandToUpdate] = useState(null);
   const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
-
   useEffect(() => {
-    async function fetchBrands() {
-      try {
-        const response = await axios.get('/api/brand/getBrands');
-        setBrands(response.data);
-        setLoading(false);
-    } catch (err) {
-        setError(err);
-        setLoading(false);
-    }
-}
-fetchBrands();
-}, [updateTable]);
-console.log(brands);
-
+    dispatch(fetchBrands());
+  }, [dispatch,updateTable]);
+  
   const openModal = () => setOpenPopup(true);
 
-  if (loading) return <p>Loading brands...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (status === 'loading') return <p>Loading brands...</p>;
+  if (status === 'failed') return <p>Error: {error}</p>;
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/brand/deleteBrand/${id}`);
-      dispatch(removeBrand(id)); // Dispatch removeBrand with the brand ID
-
+      dispatch(removeBrand(id));
       setUpdateTable((prev) => !prev);
       makeToast('The brand successfully deleted ');
     } catch (err) {
       console.error('Error deleting brand:', err);
     }
   };
-
   const handleUpdate = (brand) => {
     setBrandToUpdate(brand);
     setUpdateModalIsOpen(true);
@@ -92,7 +73,7 @@ console.log(brands);
                   )}
                 </td>
                 <td className="px-4 py-2">
-                  {brand.categories.map((category) => category.name).join(', ')}
+                  {brand.categories?.map((category) => category.name).join(', ')}
                 </td>
                 <td className="px-4 py-2">
                   <button
@@ -118,14 +99,12 @@ console.log(brands);
         setOpenPopup={setOpenPopup}
         setUpdateTable={setUpdateTable}
       />
-      {/* Add the BrandUpdateModal */}
       <BrandUpdateModal
         openPopup={updateModalIsOpen}
         setOpenPopup={setUpdateModalIsOpen}
         setUpdateTable={setUpdateTable}
         brandToUpdate={brandToUpdate}
       />
-      sss
     </div>
   );
 }

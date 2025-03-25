@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
   products: [],
@@ -18,14 +19,28 @@ const initialState = {
   userID: null,
   createdAt: null,
   updatedAt: null,
+  loading: false,
+  error: null,
 };
+
+export const fetchProducts = createAsyncThunk(
+  'productSlice/fetchProducts',
+  async () => {
+    try {
+      const response = await axios.get('/api/products/get_products');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 export const productSlice = createSlice({
   name: 'productSlice',
   initialState,
   reducers: {
     setProducts: (state, action) => {
-        state.products = action.payload;
+      state.products = action.payload;
     },
     setProduct: (state, action) => {
       return action.payload;
@@ -58,8 +73,7 @@ export const productSlice = createSlice({
           ),
         };
       } else {
-        // console.error('Product not found when adding image:', productId);
-        return state; // Return the original state if product not found
+        return state;
       }
     },
     removeImage: (state, action) => {
@@ -81,6 +95,21 @@ export const productSlice = createSlice({
     incrementViews: (state) => {
       state.views += 1;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
   },
 });
 

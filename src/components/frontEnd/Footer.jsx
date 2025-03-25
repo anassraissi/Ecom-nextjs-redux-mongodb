@@ -1,36 +1,74 @@
-import React from 'react';
+import React from "react";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa"; // Import social media icons
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-800 text-white py-5 mt-8">
+    <footer className="bg-gray-900 text-white py-8 mt-5">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+          {/* Copyright Section */}
           <div className="text-center md:text-left">
-            <p>&copy; {currentYear} Your Company Name. All rights reserved.</p>
+            <p className="text-sm text-gray-400">
+              &copy; {currentYear} Your Company Name. All rights reserved.
+            </p>
           </div>
-          <div className="flex space-x-6 mt-4 md:mt-0"> {/* Social media links */}
-            <a href="#" className="hover:text-gray-400">
-              {/* Add your social media icons here (e.g., Font Awesome, React Icons) */}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {/* Example Facebook Icon */}
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+
+          {/* Social Media Links */}
+          <div className="flex space-x-6">
+            <a
+              href="#"
+              className="text-gray-400 hover:text-blue-500 transition-colors"
+              aria-label="Facebook"
+            >
+              <FaFacebook className="h-6 w-6" />
             </a>
-            <a href="#" className="hover:text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {/* Example Twitter Icon */}
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9A9 9 0 003 12m0 0l11.49 11.49m-9.4-9.4a2 2 0 112.83 2.83" />
-              </svg>
+            <a
+              href="#"
+              className="text-gray-400 hover:text-blue-400 transition-colors"
+              aria-label="Twitter"
+            >
+              <FaTwitter className="h-6 w-6" />
             </a>
-            {/* Add more social media links as needed */}
+            <a
+              href="#"
+              className="text-gray-400 hover:text-pink-500 transition-colors"
+              aria-label="Instagram"
+            >
+              <FaInstagram className="h-6 w-6" />
+            </a>
+            <a
+              href="#"
+              className="text-gray-400 hover:text-blue-600 transition-colors"
+              aria-label="LinkedIn"
+            >
+              <FaLinkedin className="h-6 w-6" />
+            </a>
           </div>
+
+          {/* Additional Links */}
           <div className="text-center md:text-right">
-            {/* Add any additional links or information here (e.g., Terms of Service, Privacy Policy) */}
-            <a href="#" className="hover:text-gray-400 mr-4">Terms</a>
-            <a href="#" className="hover:text-gray-400">Privacy</a>
+            <a
+              href="#"
+              className="text-sm text-gray-400 hover:text-white transition-colors mr-4"
+            >
+              Terms of Service
+            </a>
+            <a
+              href="#"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 mt-6 pt-6 text-center">
+          <p className="text-sm text-gray-400">
+            Made with ❤️ by Your Company Name
+          </p>
         </div>
       </div>
     </footer>

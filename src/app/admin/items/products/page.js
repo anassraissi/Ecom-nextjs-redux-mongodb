@@ -31,6 +31,7 @@ const ProductsPage = () => {
     };
     fetchProducts();
   }, [updateTable, dispatch]);
+  console.log('products',products);
 
   return (
     <div className="bg-white h-[calc(100vh-96px)] rounded-lg p-6 shadow-sm">

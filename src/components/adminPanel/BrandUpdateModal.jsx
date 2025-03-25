@@ -23,7 +23,7 @@ const BrandUpdateModal = ({ openPopup, setOpenPopup, setUpdateTable, brandToUpda
       setInputData({
         name: brandToUpdate.name,
         description: brandToUpdate.description,
-        categories: brandToUpdate.categories.map((category) => category._id).join(', '), // Pre-fill with existing category IDs
+        categories: brandToUpdate.categories?.map((category) => category._id).join(', '), // Pre-fill with existing category IDs
       });
       setLogoAltText(brandToUpdate.logoUrl ? `Logo for ${brandToUpdate.name}` : '');
     }

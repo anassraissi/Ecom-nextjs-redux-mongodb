@@ -22,7 +22,6 @@ export async function GET(request) {
             }
             return product.toObject();
         }));
-
         return NextResponse.json(productsWithBrands);
     } catch (error) {
         console.error("Error fetching products:", error);
