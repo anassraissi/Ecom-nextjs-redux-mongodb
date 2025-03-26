@@ -18,7 +18,6 @@ const Banner = () => {
       bgColor: "#e3edf6",
     },
   ];
-
   return (
     <div className="container mx-auto px-4 mt-32">
       <div className="flex flex-col lg:flex-row gap-6">

@@ -18,6 +18,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "formidable": "^3.5.2",
+    "framer-motion": "^12.5.0",
     "fs": "^0.0.1-security",
     "immer": "^10.1.1",
     "mongodb": "^6.12.0",
