@@ -1,101 +1,172 @@
 "use client";
 import React, { useState } from "react";
-import { MdDashboard, MdManageAccounts } from "react-icons/md";
-import { GrTransaction } from "react-icons/gr";
-import { IoAnalytics, IoSettings } from "react-icons/io5";
-import { RiShoppingCartLine } from "react-icons/ri";
-import { AiOutlineDown, AiOutlineUp } from "react-icons/ai";
+import { 
+  MdDashboard, 
+  MdManageAccounts,
+  MdInventory,
+  MdCategory,
+  MdLocalOffer,
+  MdBrandingWatermark
+} from "react-icons/md";
+import { FiSettings, FiUsers, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { HiOutlineCurrencyDollar } from "react-icons/hi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { setLoading } from "@/redux/features/loadingSlice";
+import Image from "next/image";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [isProductsOpen, setIsProductsOpen] = useState(false); // State to toggle the submenu
+  const [openSubmenus, setOpenSubmenus] = useState({});
+
+  const toggleSubmenu = (title) => {
+    setOpenSubmenus(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   const menus = [
     {
       title: "Dashboard",
-      icon: <MdDashboard />,
+      icon: <MdDashboard className="text-lg" />,
       href: "/admin/dashboard",
     },
     {
-      title: "Manages Containers",
-      icon: <RiShoppingCartLine />,
-      href: "#",
+      title: "Inventory",
+      icon: <MdInventory className="text-lg" />,
       hasSubMenu: true,
       subMenu: [
-        { title: "Products", href: "/admin/items/products" },
-        { title: "Categories", href: "/admin/items/categories" },
-        { title: "Brands", href: "/admin/items/brands" },
-        { title: "Sales", href: "/admin/items/sales" },
+        { 
+          title: "Products", 
+          href: "/admin/items/products",
+          icon: <MdInventory className="text-base" />
+        },
+        { 
+          title: "Categories", 
+          href: "/admin/items/categories",
+          icon: <MdCategory className="text-base" />
+        },
+        { 
+          title: "Brands", 
+          href: "/admin/items/brands",
+          icon: <MdBrandingWatermark className="text-base" />
+        },
+        { 
+          title: "Sales", 
+          href: "/admin/items/sales",
+          icon: <MdLocalOffer className="text-base" />
+        },
       ],
     },
     {
-      title: "Account",
-      icon: <MdManageAccounts />,
+      title: "Users",
+      icon: <FiUsers className="text-lg" />,
       href: "/admin/users",
     },
     {
       title: "Transactions",
-      icon: <GrTransaction />,
-      href: "",
+      icon: <HiOutlineCurrencyDollar className="text-lg" />,
+      href: "/admin/transactions",
     },
     {
       title: "Settings",
-      icon: <IoSettings />,
-      href: "",
+      icon: <FiSettings className="text-lg" />,
+      href: "/admin/settings",
     },
   ];
+
   return (
-    <div className="bg-white w-[300px] min-h-screen p-4 shrink-0">
-      <div className="flex items-center gap-4">
-        <img className="size-12 rounded-lg" src="/logos/logo.png" alt="logo" />
-        <h2 className="text-[20px] font-semibold">The Raissi Dashboard EcomeStore</h2>
+    <div className="w-64 min-h-screen bg-white border-r border-gray-200 shadow-sm flex flex-col">
+      {/* Logo Section */}
+      <div className="p-5 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <Image 
+            src="/logos/logo.png" 
+            alt="Raissi Store Logo"
+            width={40}
+            height={40}
+            className="rounded-lg"
+          />
+          <h2 className="text-lg font-semibold text-gray-800">Raissi Store Admin</h2>
+        </div>
       </div>
-      <ul className="space-y-4 mt-6">
-        {menus.map((menu) => (
-          <div key={menu.title}>
-            <Link
-              href={menu.href || "#"}
-              onClick={() => {
-                if (menu.hasSubMenu) {
-                  setIsProductsOpen((prev) => !prev);
-                }
-              }}
-              className={`flex gap-2 items-center p-4 rounded-lg cursor-pointer hover:bg-blue hover:text-white ${
-                pathname === menu.href ? " bg-blue text-white" : "bg-gray-200"
-              }`}
-            >
-              <div className="text-[20px]">{menu.icon}</div>
-              <p>{menu.title}</p>
-              {menu.hasSubMenu && (
-                <div className="ml-auto">
-                  {isProductsOpen ? <AiOutlineUp /> : <AiOutlineDown />}
-                </div>
+
+      {/* Navigation Menu */}
+      <nav className="flex-1 overflow-y-auto p-4">
+        <ul className="space-y-1">
+          {menus.map((menu) => (
+            <li key={menu.title}>
+              {menu.hasSubMenu ? (
+                <>
+                  <button
+                    onClick={() => toggleSubmenu(menu.title)}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      pathname.includes(menu.title.toLowerCase()) 
+                        ? "bg-blue-50 text-blue-600" 
+                        : "hover:bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-blue-500">{menu.icon}</span>
+                      <span className="text-sm font-medium">{menu.title}</span>
+                    </div>
+                    {openSubmenus[menu.title] ? (
+                      <FiChevronUp className="text-gray-400 text-sm" />
+                    ) : (
+                      <FiChevronDown className="text-gray-400 text-sm" />
+                    )}
+                  </button>
+                  
+                  {openSubmenus[menu.title] && (
+                    <ul className="ml-8 mt-1 space-y-1">
+                      {menu.subMenu.map((subItem) => (
+                        <li key={subItem.title}>
+                          <Link
+                            href={subItem.href}
+                            className={`flex items-center gap-3 p-2 pl-3 text-sm rounded-lg transition-colors ${
+                              pathname === subItem.href
+                                ? "bg-blue-100 text-blue-600 font-medium"
+                                : "hover:bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            <span className="text-blue-400">{subItem.icon}</span>
+                            {subItem.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href={menu.href}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                    pathname === menu.href
+                      ? "bg-blue-50 text-blue-600"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  <span className="text-blue-500">{menu.icon}</span>
+                  <span className="text-sm font-medium">{menu.title}</span>
+                </Link>
               )}
-            </Link>
-            {menu.hasSubMenu && isProductsOpen && (
-              <ul className="pl-8 mt-2 space-y-2">
-                {menu.subMenu.map((subMenuItem) => (
-                  <li key={subMenuItem.title}>
-                    <Link
-                      href={subMenuItem.href}
-                      className={`block p-2 rounded-lg cursor-pointer hover:bg-blue hover:text-white ${
-                        pathname === subMenuItem.href
-                          ? "bg-blue text-white"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      {subMenuItem.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* User Profile Section */}
+      <div className="p-4 border-t border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+            <span className="text-blue-600 text-sm font-medium">AD</span>
           </div>
-        ))}
-      </ul>
+          <div>
+            <p className="text-sm font-medium text-gray-800">Admin User</p>
+            <p className="text-xs text-gray-500">Super Admin</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

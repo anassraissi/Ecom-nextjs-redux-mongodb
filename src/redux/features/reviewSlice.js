@@ -9,6 +9,7 @@ export const fetchReviews = createAsyncThunk(
     'reviews/fetchReviews',
     async (productId) => {
         try {
+            if(productId === undefined) return [];
             const response = await axios.get(`/api/reviews/getReview/${productId}`); // Replace with your API endpoint
             return response.data;
         } catch (error) {

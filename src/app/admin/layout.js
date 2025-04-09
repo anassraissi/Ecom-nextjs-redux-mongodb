@@ -9,20 +9,19 @@ const Layout = ({ children }) => {
   const isLoading = useAppSelector((store) => store.loading);
   const { data: session } = useSession();
 
-  // Render Login component if user is not authenticated
   if (!session?.user) {
     return <Login />;
   }
-  console.log('isLoading',isLoading);
-  
-  // Render layout if user is authenticated
+
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <div className="w-full h-full">
-        <div className="bg-gray-200 p-4 h-[calc(100vh-64px)]">{children}</div>
-        {isLoading && <Loader />} {/* Display loader during loading */}
-      </div>
+      <main className="flex-1 overflow-auto">
+        <div className="p-6">
+          {children}
+        </div>
+      </main>
+      {isLoading && <Loader />}
     </div>
   );
 };

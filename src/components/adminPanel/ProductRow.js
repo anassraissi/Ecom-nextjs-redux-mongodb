@@ -1,91 +1,103 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { useDispatch } from 'react-redux';
 import { setLoading } from "@/redux/features/loadingSlice";
 import { CiEdit } from 'react-icons/ci';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import axios from 'axios';
-import { removeProduct, setProduct, updateProduct } from '@/redux/features/productSlice';
+import { removeProduct } from '@/redux/features/productSlice';
 import { makeToast } from '../../../utils/helpers';
 
-const ProductRow = ({ product, srNo, setOpenPopup,setUpdateTable,setPopupType,PopupType,setProductToUpdate}) => {
+const ProductRow = ({ product, srNo, setOpenPopup, setUpdateTable, setPopupType, setProductToUpdate }) => {
   const dispatch = useDispatch();
+
   const handleEdit = () => {
-    setProductToUpdate(product)
-    // Handle opening the edit popup/mod  al
-    setPopupType('update')
+    setProductToUpdate(product);
+    setPopupType('update');
     setOpenPopup(true);
   };
 
   const handleDelete = async () => {
-    const confirmDelete = confirm(`Are you sure you want to delete "${product.name}"?`);
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${product.name}"?`);
     if (!confirmDelete) return;
   
-    dispatch(setLoading(true)); // Set loading state
+    dispatch(setLoading(true));
   
     try {
       const res = await axios.delete(`/api/products/removeProduct/${product._id}`);
   
       if (res.status === 200 && res.data.success) {
-        makeToast(`"${product.name}" has been deleted successfully!`)
-  
-        dispatch(removeProduct());
-  
-        setUpdateTable((prev) => !prev); // Trigger table update
+        makeToast(`"${product.name}" has been deleted successfully!`);
+        dispatch(removeProduct(product._id));
+        setUpdateTable((prev) => !prev);
       } else {
-        makeToast(`Failed to delete product. Please try again.`)
-
+        makeToast('Failed to delete product. Please try again.');
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-
-      makeToast("Failed to delete product. Please try again.")
-
+      makeToast(error.response?.data?.message || 'Failed to delete product. Please try again.');
     } finally {
-      dispatch(setLoading(false)); // Set loading state to false
+      dispatch(setLoading(false));
     }
   };
-  return (
-    <tr key={product._id} className="text-center border-b border-gray-200">
-      <td className="px-4 py-2">{srNo}</td>
-      <td className="px-4 py-2">{product.name}</td>
-      <td className="px-4 py-2">${product.price.toFixed(2)}</td>
-      <td className="px-4 py-2">{product.category?.name || 'N/A'}</td>
-      <td className="px-4 py-2">{product.brand?.name || 'N/A'}</td>
-      <td className="px-4 py-2">
-      <div className="flex items-center gap-2">
-        {product.images && product.images.length > 0 ? (
-          product.images.map((image, index) => (
-            <div
-              key={index}
-              className="relative w-16 h-16 overflow-hidden border border-gray-300"
-            >
-              <Image
-                src={`/images/products/${image.url}`}
-                alt={image.altText || product.name}
-                layout="fill"
-                objectFit="cover"
-              />
-            </div>
-          ))
-        ) : (
-          <span>No Images</span>
-        )}
-      </div>
-    </td>
-    
-      <td className="px-4 py-2">
-        <div className="flex justify-center items-center gap-4 text-xl">
-          <CiEdit
-            className="cursor-pointer text-gray-600 hover:text-black"
-            onClick={handleEdit}
 
-          />
-          <RiDeleteBin5Line
-            className="cursor-pointer text-red-600 hover:text-red-800"
-            onClick={()=>handleDelete()}
-          />
+  return (
+    <tr className="hover:bg-gray-50 transition-colors">
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        {srNo}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        ${product.price.toFixed(2)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {product.category?.name || 'N/A'}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {product.brand?.name || 'N/A'}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center gap-2">
+          {product.images?.length > 0 ? (
+            product.images.slice(0, 3).map((image, index) => (
+              <div key={index} className="relative w-10 h-10 rounded-md overflow-hidden border border-gray-200">
+                <Image
+                  src={`/images/products/${image.url}`}
+                  alt={image.altText || product.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))
+          ) : (
+            <span className="text-xs text-gray-400">No images</span>
+          )}
+          {product.images?.length > 3 && (
+            <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+              +{product.images.length - 3} more
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex justify-end items-center gap-4">
+          <button
+            onClick={handleEdit}
+            className="text-blue-600 hover:text-blue-900 transition-colors"
+            title="Edit product"
+          >
+            <CiEdit className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="text-red-600 hover:text-red-900 transition-colors"
+            title="Delete product"
+          >
+            <RiDeleteBin5Line className="h-5 w-5" />
+          </button>
         </div>
       </td>
     </tr>

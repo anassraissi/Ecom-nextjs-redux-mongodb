@@ -21,8 +21,7 @@ export default async function RootLayout({ children }) {
         <AuthProvider>
         <App>{children}</App>
         </AuthProvider>
-        <Toaster position="bottom-center" reverseOrder={false} />
-      </body>
+        </body>
     </html>
   );
 }

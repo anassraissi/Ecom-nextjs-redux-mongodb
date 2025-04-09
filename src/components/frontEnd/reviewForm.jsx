@@ -30,7 +30,7 @@ const ReviewForm = ({ productId }) => {
   };
 
   return (
-    <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
+    <div className="mt-0 p-5 bg-white rounded-lg shadow-md">
       <h3 className="text-2xl font-semibold mb-6 text-gray-800">Write a Review</h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Star Rating */}

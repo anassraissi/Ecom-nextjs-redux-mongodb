@@ -61,10 +61,9 @@ export async function PUT(req, { params }) {
     const name = fields.name?.[0] || '';
     const description = fields.description?.[0] || '';
     const categories = fields.categories?.[0] || null; // Get the selected category ID
-
     let fileName = null;
-    if (files.logoUrl) {
-      const file = files.logoUrl[0];
+    if (files.logo) {
+      const file = files.logo[0];
       fileName = file.newFilename;
       const destination = path.join(process.cwd(), 'public/images/brands', fileName);
 

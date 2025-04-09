@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 // Async Thunks
 export const createSale = createAsyncThunk(
@@ -12,8 +13,12 @@ export const createSale = createAsyncThunk(
       console.log('Sale data:', saleData);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        return rejectWithValue(errorData.message);
+        try {
+          const errorData = await response.json();
+          return rejectWithValue(errorData.message);
+        } catch (parseError) {
+          return rejectWithValue(`Server error: ${response.status}`);
+        }
       }
 
       return await response.json();
@@ -25,9 +30,16 @@ export const createSale = createAsyncThunk(
 
 export const getSales = createAsyncThunk(
   'sales/getSales',
-  async (_, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => { // Accept params
     try {
-      const response = await fetch('/api/sales/getSales');
+      let url = '/api/sales/getSales';
+
+      if (params && Object.keys(params).length > 0) {
+        const queryParams = new URLSearchParams(params);
+        url += `?${queryParams.toString()}`;
+      }
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -42,30 +54,22 @@ export const getSales = createAsyncThunk(
   }
 );
 
-export const updateSale = createAsyncThunk(
+export const updateSaleAsync = createAsyncThunk(
   'sales/updateSale',
   async ({ id, saleData }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/sales/${id}`, {
-        method: 'PUT',
+      const response = await axios.put(`/api/sales/updateSale/${id}`, saleData, { // Corrected URL
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
-        body: JSON.stringify(saleData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        return rejectWithValue(errorData.message);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response.data);
     }
   }
 );
-
 export const deleteSale = createAsyncThunk(
   'sales/deleteSale',
   async (id, { rejectWithValue }) => {
@@ -91,6 +95,8 @@ const saleSlice = createSlice({
   name: 'sales',
   initialState: {
     sales: [],
+    salesTypeSale: [],
+    salesTypeBanner: [],
     status: 'idle',
     error: null,
   },
@@ -112,19 +118,26 @@ const saleSlice = createSlice({
       })
       .addCase(getSales.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.sales = action.payload;
+        // Determine which state slice to update based on the 'type' in the action meta
+        if (action.meta.arg && action.meta.arg.type === 'sale') {
+          state.salesTypeSale = action.payload;
+        } else if (action.meta.arg && action.meta.arg.type === 'banner') {
+          state.salesTypeBanner = action.payload;
+        } else {
+          state.sales = action.payload; // Fallback for general fetches if needed
+        }
       })
       .addCase(getSales.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })
-      .addCase(updateSale.pending, (state) => {
+      .addCase(updateSaleAsync.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(updateSale.fulfilled, (state) => {
+      .addCase(updateSaleAsync.fulfilled, (state) => {
         state.status = 'succeeded';
       })
-      .addCase(updateSale.rejected, (state, action) => {
+      .addCase(updateSaleAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })

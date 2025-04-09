@@ -1,11 +1,10 @@
 // lib/dbConnect.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-
+import User from './User';
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI;
-
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
@@ -13,7 +12,7 @@ if (!MONGODB_URI) {
 
 let cached = global.mongoose;
 
-if (!cached) {  
+if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
@@ -23,9 +22,9 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
+    // Remove useNewUrlParser: true
     const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      useUnifiedTopology: true, // Keep this if desired
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

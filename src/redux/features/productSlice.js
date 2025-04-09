@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const initialState = {
   products: [],
+  selectedProduct: null, // To hold the fetched product by ID
+  relatedProducts: [],
   _id: '',
   name: '',
   description: '',
@@ -35,6 +37,34 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+export const fetchProductsByCategory = createAsyncThunk(
+  'productSlice/fetchProductsByCategory',
+  async ({ categoryId, excludeId }) => { // Expect an object with categoryId and excludeId
+    try {
+      let url = `/api/products/getProductsByCategory/${categoryId}`;
+      if (excludeId) {
+        url += `?excludeId=${excludeId}`;
+      }
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const fetchProductById = createAsyncThunk(
+  'productSlice/fetchProductById',
+  async (productId) => {
+    try {
+      const response = await axios.get(`/api/products/getProductById/${productId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const productSlice = createSlice({
   name: 'productSlice',
   initialState,
@@ -43,7 +73,7 @@ export const productSlice = createSlice({
       state.products = action.payload;
     },
     setProduct: (state, action) => {
-      return action.payload;
+      state.selectedProduct = action.payload;
     },
     updateProduct: (state, action) => {
       return {
@@ -101,6 +131,7 @@ export const productSlice = createSlice({
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.selectedProduct = null; // Clear selected product on load
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
@@ -109,6 +140,36 @@ export const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+        state.products = [];
+        state.selectedProduct = null;
+      })
+      .addCase(fetchProductsByCategory.pending, (state) => {
+        state.loadingRelated = true;
+        state.errorRelated = null;
+        state.relatedProducts = [];
+      })
+      .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
+        state.loadingRelated = false;
+        state.relatedProducts = action.payload;
+      })
+      .addCase(fetchProductsByCategory.rejected, (state, action) => {
+        state.loadingRelated = false;
+        state.errorRelated = action.error.message;
+        state.relatedProducts = [];
+      })
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.selectedProduct = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+        state.selectedProduct = null;
       });
   },
 });
@@ -123,5 +184,7 @@ export const {
   removeProduct,
   incrementViews,
 } = productSlice.actions;
+
+export const selectSelectedProduct = (state) => state.productSlice;
 
 export default productSlice.reducer;

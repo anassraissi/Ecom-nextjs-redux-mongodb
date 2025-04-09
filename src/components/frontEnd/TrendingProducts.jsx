@@ -12,20 +12,15 @@ const TrendingProducts = () => {
   }, [dispatch]);
 
   if (loading) {
-    return <p className="text-center py-8">Loading trending products...</p>;
+    return <p className="text-center py-">Loading trending products...</p>;
   }
 
   if (error) {
     return <p className="text-center py-8 text-red-600">Error: {error}</p>;
   }
-
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-2 py-1">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-0">
-          Trending Products
-        </h2>
-
         <div className="flex space-x-6 text-gray-600">
           <button
             className="text-black font-semibold hover:text-blue-600 transition-colors"
@@ -63,7 +58,6 @@ const TrendingProducts = () => {
           />
         ))}
       </div>
-
       {/* Optional: Add "View All" Link */}
       <div className="mt-8 text-center">
         <Link href="/products" className="text-blue-600 hover:underline">

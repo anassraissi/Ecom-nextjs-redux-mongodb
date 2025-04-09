@@ -16,6 +16,15 @@ const ReviewsDisplay = ({ productId }) => {
     dispatch(fetchReviews(productId));
   }, [dispatch, productId]);
 
+  if (status === "idle") {
+    return (
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+        <p className="text-gray-600">No reviews yet.</p>
+      </div>
+    );
+  }
+
   if (status === "loading") {
     return (
       <div className="mt-8">

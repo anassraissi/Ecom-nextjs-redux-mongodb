@@ -6,13 +6,13 @@ import {
   AiOutlineHeart,
   AiFillHeart,
 } from "react-icons/ai";
-import toast from "react-hot-toast";
 import { useAppDispatch } from "@/redux/hooks";
 import { addToCart } from "@/redux/features/cartSlice";
 import Image from "next/image";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { fetchReviews } from "@/redux/features/reviewSlice";
+import toast, { configure } from 'react-hot-toast'; // Import configure
 
 const ProductCard = ({
   id,
@@ -27,41 +27,36 @@ const ProductCard = ({
   const dispatch = useAppDispatch();
   const [isLiked, setIsLiked] = useState(false);
   const [stars, setStars] = useState([]);
-  const [averageRating, setAverageRating] = useState([]); // Initialize as 0
+  const [averageRating, setAverageRating] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const { reviews, loading: reviewsLoading, error: reviewsError } = useSelector(
     (state) => state.reviews
   );
+
 
   useEffect(() => {
     dispatch(fetchReviews(id));
   }, [dispatch, id]);
 
   useEffect(() => {
-    const likedItems = JSON.parse(
-      localStorage.getItem("likedProducts") || "[]"
-    );
+    const likedItems = JSON.parse(localStorage.getItem("likedProducts") || "[]");
     setIsLiked(likedItems.includes(id));
   }, [id]);
 
   useEffect(() => {
     if (reviews && !reviewsLoading && !reviewsError) {
       const productReviews = reviews.filter((review) => review.product === id);
-      if (productReviews.length === 0) {
-        setAverageRating(averageRating.length === 0 ? [0] : [...averageRating]);
-        setStars([]);
-        return;
+      if (productReviews.length > 0) {
+        const totalRating = productReviews.reduce(
+          (sum, review) => sum + review.rating,
+          0
+        );
+        const avgRating = totalRating / productReviews.length;
+        setAverageRating(avgRating);
+        setStars(renderStars(avgRating));
       }
-      const totalRating = productReviews.reduce(
-        (sum, review) => sum + review.rating,
-        0
-      );
-      const avgRating = totalRating / productReviews.length;
-      setAverageRating([avgRating]); // Store the new average in the array
-      setStars(renderStars(avgRating));
     }
   }, [reviews, id, reviewsLoading, reviewsError]);
-  
 
   const addProductToCart = (e) => {
     e.stopPropagation();
@@ -75,7 +70,9 @@ const ProductCard = ({
       quantity: 1,
     };
     dispatch(addToCart(payload));
-    toast.success("Added to Cart!");
+    toast.success("Added to Cart!", {
+      id: `add-to-cart-${id}`, // Unique toast ID
+    });
   };
 
   const toggleLike = (e) => {
@@ -88,9 +85,13 @@ const ProductCard = ({
       : likedItems.filter((itemId) => itemId !== id);
     localStorage.setItem("likedProducts", JSON.stringify(updatedLikedItems));
     toast.success(
-      newLikedStatus ? "❤️ Added to favorites" : "💔 Removed from favorites"
+      newLikedStatus ? "❤️ Added to favorites" : "💔 Removed from favorites",
+      {
+        id: `like-${id}`, // Unique toast ID
+      }
     );
   };
+
 
   const renderStars = (rating) => {
     const filledStars = Math.floor(rating);
@@ -195,7 +196,7 @@ const ProductCard = ({
             {title}
           </h3>
 
-          {colors.length > 0 && (
+          {colors?.length > 0 && (
             <div className="mb-3">
               <p className="text-xs text-gray-600 mb-1">
               Available Colors:
