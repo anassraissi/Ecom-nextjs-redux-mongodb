@@ -23,6 +23,7 @@ const ProductCard = ({
   discountPrice,
   colors,
   stock,
+  slug,
 }) => {
   const dispatch = useAppDispatch();
   const [isLiked, setIsLiked] = useState(false);
@@ -137,7 +138,12 @@ const ProductCard = ({
         </div>
       )}
 
-      <Link href={`/product/${id}`} className="block">
+      <Link   href={{
+        pathname: `/product/${slug}`,
+        query: { id } // Pass ID hidden in query
+      }} 
+      as={`/product/${slug}`} // What appears in browser
+      className="block">
         <div className="relative h-48 w-full bg-gray-50">
           <Image
             src={`/images/products/${img}`}

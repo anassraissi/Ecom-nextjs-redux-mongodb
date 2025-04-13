@@ -55,6 +55,7 @@ const TrendingProducts = () => {
             discountPrice={item.discountPrice}
             stock={item.stock}
             colors={item.images.map((image) => image.color)}
+            slug={item.slug}
           />
         ))}
       </div>

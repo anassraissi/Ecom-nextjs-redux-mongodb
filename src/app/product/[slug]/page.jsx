@@ -26,7 +26,7 @@ import DeliveryInfo from "@/components/frontEnd/DeliveryInfo";
 import ReturnPolicy from "@/components/frontEnd/ReturnPolicy";
 import {
   fetchProductById,
-  fetchProductsByCategory,
+  fetchProductsByCategory,fetchProductBySlug,
 } from "@/redux/features/productSlice";
 import { fetchReviews } from "@/redux/features/reviewSlice";
 import { calculateAverageRating,renderStars } from "../../../../utils/reviewHelpers";
@@ -35,7 +35,7 @@ import { Title } from "chart.js";
 
 const ProductDetail = () => {
   const params = useParams();
-  const { id } = params;
+  const { id, slug } = params;
   const [showCart, setShowCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -59,7 +59,7 @@ const ProductDetail = () => {
 useEffect(() => {
   // Fetch product and reviews together
   const fetchData = async () => {
-     dispatch(fetchProductById(id));
+     dispatch(fetchProductBySlug(slug));
      dispatch(fetchReviews(id));
   };
   fetchData();
