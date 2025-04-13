@@ -3,135 +3,135 @@ import axios from 'axios';
 
 const initialState = {
   products: [],
-  selectedProduct: null, // To hold the fetched product by ID
+  selectedProduct: null,
   relatedProducts: [],
-  _id: '',
-  name: '',
-  description: '',
-  price: 0,
-  discountPrice: 0,
-  stock: 0,
-  category: null,
-  brand: null,
-  manufactureYear: null,
-  images: [],
-  tags: [],
-  views: 0,
-  sold: 0,
-  userID: null,
-  createdAt: null,
-  updatedAt: null,
   loading: false,
+  loadingRelated: false,
   error: null,
+  errorRelated: null,
 };
 
+// Helper function for API error handling
+const handleApiError = (error) => {
+  if (error.response) {
+    // Server responded with a status code outside 2xx range
+    return error.response.data.message || error.response.statusText;
+  } else if (error.request) {
+    // Request was made but no response received
+    return 'Network error - no response from server';
+  }
+  // Something happened in setting up the request
+  return error.message || 'Unknown error occurred';
+};
+
+// Fetch all products
 export const fetchProducts = createAsyncThunk(
-  'productSlice/fetchProducts',
-  async () => {
+  'products/fetchAll',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/api/products/get_products');
-      return response.data;
+      const { data } = await axios.get('/api/products/get_products');
+      return data;
     } catch (error) {
-      throw error;
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
 
+// Fetch products by category
 export const fetchProductsByCategory = createAsyncThunk(
-  'productSlice/fetchProductsByCategory',
-  async ({ categoryId, excludeId }) => { // Expect an object with categoryId and excludeId
+  'products/fetchByCategory',
+  async ({ categoryId, excludeId }, { rejectWithValue }) => {
     try {
-      let url = `/api/products/getProductsByCategory/${categoryId}`;
-      if (excludeId) {
-        url += `?excludeId=${excludeId}`;
-      }
-      const response = await axios.get(url);
-      return response.data;
+      const params = excludeId ? { excludeId } : {};
+      const { data } = await axios.get(
+        `/api/products/getProductsByCategory/${categoryId}`,
+        { params }
+      );
+      return data;
     } catch (error) {
-      throw error;
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
 
+// Fetch single product by ID
 export const fetchProductById = createAsyncThunk(
-  'productSlice/fetchProductById',
-  async (productId) => {
+  'products/fetchById',
+  async (productId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/products/getProductById/${productId}`);
-      return response.data;
+      const { data } = await axios.get(`/api/products/getProductById/${productId}`);
+      return data;
     } catch (error) {
-      throw error;
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
 
-export const productSlice = createSlice({
-  name: 'productSlice',
+const productSlice = createSlice({
+  name: 'products',
   initialState,
   reducers: {
     setProducts: (state, action) => {
       state.products = action.payload;
     },
-    setProduct: (state, action) => {
+    setSelectedProduct: (state, action) => {
       state.selectedProduct = action.payload;
     },
     updateProduct: (state, action) => {
-      return {
-        ...state,
-        ...action.payload,
-      };
+      if (state.selectedProduct) {
+        state.selectedProduct = { ...state.selectedProduct, ...action.payload };
+      }
     },
-    resetProduct: () => {
-      return initialState;
-    },
+    resetProductState: () => initialState,
     addImage: (state, action) => {
-      const { productId, ...newImage } = action.payload;
-      const productIndex = state.products.findIndex(
-        (product) => product._id === productId
-      );
-
-      if (productIndex !== -1) {
-        return {
-          ...state,
-          products: state.products.map((product, index) =>
-            index === productIndex
-              ? {
-                  ...product,
-                  images: [...product.images, newImage],
-                }
-              : product
-          ),
-        };
-      } else {
-        return state;
+      const { productId, image } = action.payload;
+      const product = state.products.find(p => p._id === productId);
+      if (product) {
+        product.images.push(image);
+      }
+      if (state.selectedProduct?._id === productId) {
+        state.selectedProduct.images.push(image);
       }
     },
     removeImage: (state, action) => {
       const { productId, imageUrl } = action.payload;
-      const productIndex = state.products.findIndex(
-        (product) => product._id === productId
+      state.products = state.products.map(product => 
+        product._id === productId
+          ? {
+              ...product,
+              images: product.images.filter(img => img.url !== imageUrl)
+            }
+          : product
       );
-
-      if (productIndex !== -1) {
-        state.products[productIndex].images = state.products[
-          productIndex
-        ].images.filter((image) => image.url !== imageUrl);
+      
+      if (state.selectedProduct?._id === productId) {
+        state.selectedProduct.images = state.selectedProduct.images.filter(
+          img => img.url !== imageUrl
+        );
       }
     },
-    removeProduct: (state, action) => {
+    deleteProduct: (state, action) => {
       const productId = action.payload;
-      state.products = state.products.filter((product) => product._id !== productId);
+      state.products = state.products.filter(product => product._id !== productId);
+      if (state.selectedProduct?._id === productId) {
+        state.selectedProduct = null;
+      }
     },
-    incrementViews: (state) => {
-      state.views += 1;
+    incrementProductViews: (state) => {
+      if (state.selectedProduct) {
+        state.selectedProduct.views = (state.selectedProduct.views || 0) + 1;
+      }
     },
+    clearRelatedProducts: (state) => {
+      state.relatedProducts = [];
+    }
   },
   extraReducers: (builder) => {
     builder
+      // Fetch all products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.selectedProduct = null; // Clear selected product on load
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
@@ -139,14 +139,13 @@ export const productSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-        state.products = [];
-        state.selectedProduct = null;
+        state.error = action.payload;
       })
+      
+      // Fetch products by category
       .addCase(fetchProductsByCategory.pending, (state) => {
         state.loadingRelated = true;
         state.errorRelated = null;
-        state.relatedProducts = [];
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         state.loadingRelated = false;
@@ -154,13 +153,13 @@ export const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.loadingRelated = false;
-        state.errorRelated = action.error.message;
-        state.relatedProducts = [];
+        state.errorRelated = action.payload;
       })
+      
+      // Fetch product by ID
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.selectedProduct = null;
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.loading = false;
@@ -168,23 +167,27 @@ export const productSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-        state.selectedProduct = null;
+        state.error = action.payload;
       });
-  },
+  }
 });
 
 export const {
-  setProducts,
-  setProduct,
+  setProducts:setProduct ,
+  setSelectedProduct,
   updateProduct,
-  resetProduct,
+  resetProductState,
   addImage,
   removeImage,
-  removeProduct,
-  incrementViews,
+  deleteProduct: removeProduct ,
+  incrementProductViews,
+  clearRelatedProducts
 } = productSlice.actions;
 
-export const selectSelectedProduct = (state) => state.productSlice;
+export const selectAllProducts = (state) => state.products.products;
+export const selectSelectedProduct = (state) => state.products.selectedProduct;
+export const selectRelatedProducts = (state) => state.products.relatedProducts;
+export const selectProductsLoading = (state) => state.products.loading;
+export const selectProductsError = (state) => state.products.error;
 
 export default productSlice.reducer;

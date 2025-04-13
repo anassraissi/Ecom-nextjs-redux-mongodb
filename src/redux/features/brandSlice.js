@@ -19,7 +19,6 @@ export const fetchBrands = createAsyncThunk(
   async () => {
     try {
       const response = await axios.get('/api/brand/getBrands'); // Assuming you have an endpoint for brands 
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw error;

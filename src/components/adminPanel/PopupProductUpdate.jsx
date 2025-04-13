@@ -115,11 +115,6 @@ const PopupProductUpdate = ({
     },
     warranty: productToUpdate?.warranty || "1-year warranty",
   });
-  useEffect(() => {
-    console.log("Raw specs from DB:", productToUpdate?.specifications);
-    console.log("Type of specs:", typeof productToUpdate?.specifications);
-    console.log("Processed specs:", inputData.specifications);
-  }, [productToUpdate]);
 
 
   const [imageFiles, setImageFiles] = useState([]);

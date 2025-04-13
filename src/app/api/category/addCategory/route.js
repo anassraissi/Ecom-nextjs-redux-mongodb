@@ -62,7 +62,6 @@ export async function POST(req) {
     const name = fields.name?.[0] || '';
     const description = fields.description?.[0] || '';
     const parent = fields.parent?.[0] || null;
-    console.log(parent);
 let fileName=null;
     if (!name || !description) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });

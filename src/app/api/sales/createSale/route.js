@@ -57,7 +57,6 @@ export async function POST(req) {
     });
 
     const { fields, files } = formData;
-    console.log(fields, files);
 
     const product = fields.product?.[0] || null;
     const category = fields.category?.[0] || '';

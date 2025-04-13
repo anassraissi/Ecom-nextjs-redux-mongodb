@@ -64,8 +64,7 @@ export async function POST(req) {
     });
 
     // 7. Log parsed data for debugging
-    console.log("Parsed Fields:", formData.fields);
-    console.log("Parsed Files:", formData.files);
+
 
     const { fields, files } = formData;
     const { productId, color } = fields;

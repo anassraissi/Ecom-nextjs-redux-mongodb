@@ -56,7 +56,6 @@ export async function PUT(req, { params }) {
     });
 
     const { fields, files } = formData;
-    console.log('fields', fields);
 
     const updateFields = {};
 

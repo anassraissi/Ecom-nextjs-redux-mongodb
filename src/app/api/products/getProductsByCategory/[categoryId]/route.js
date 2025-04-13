@@ -1,35 +1,33 @@
-// app/api/products/category/[categoryId]/route.js
-import dbConnect from '@/libs/models/dbConnect';
-import Product from '@/libs/models/Product';
-import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+// src/app/api/products/getProductsByCategory/[categoryId]/route.js
+import dbConnect from '@/libs/models/dbConnect'
+import Product from '@/libs/models/Product'
+import { NextResponse } from 'next/server'
 
-export async function GET(req, context) {
-  await dbConnect();
-  const awaitedContext = await context;
-  const { params } = await awaitedContext;
-  const { categoryId } = params;
-
-  // Get the specific product ID to exclude from the query parameters
-  const searchParams = req.nextUrl.searchParams;
-  const excludeProductId = searchParams.get('excludeId');
-
+export async function GET(request, { params }) {
   try {
-    const query = { category: categoryId };
-
-    // If excludeProductId is provided and is a valid ObjectId, add it to the query
-    if (excludeProductId && mongoose.Types.ObjectId.isValid(excludeProductId)) {
-      query._id = { $ne: new mongoose.Types.ObjectId(excludeProductId) };
+    await dbConnect()
+    
+    // Properly destructure params (no need for extra await)
+    const { categoryId } = params
+    
+    // Handle query parameters
+    const { searchParams } = new URL(request.url)
+    const excludeId = searchParams.get('excludeId')
+    
+    // Build query
+    const query = { category: categoryId }
+    if (excludeId) {
+      query._id = { $ne: excludeId }
     }
-
+    
+    // Fetch products
     const products = await Product.find(query)
-      .populate('category')
-      .populate('brand');
-
-    console.log(products);
-    return NextResponse.json(products, { status: 200 });
+    
+    return NextResponse.json(products)
   } catch (error) {
-    console.error('Error fetching products by category (excluding product):', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch products' },
+      { status: 500 }
+    )
   }
 }

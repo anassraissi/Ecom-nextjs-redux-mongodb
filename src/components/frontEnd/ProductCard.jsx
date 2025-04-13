@@ -68,6 +68,7 @@ const ProductCard = ({
       price,
       discountPrice,
       quantity: 1,
+      alt: title,
     };
     dispatch(addToCart(payload));
     toast.success("Added to Cart!", {

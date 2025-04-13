@@ -121,8 +121,6 @@ const BrandUpdateModal = ({
     e.preventDefault();
 
     // Debug log
-    console.log("Logo file before submit:", logoFile);
-    console.log("Logo preview:", logoPreview);
 
     setIsSubmitting(true);
 
@@ -136,7 +134,6 @@ const BrandUpdateModal = ({
 
       // Debug form data before sending
       for (let [key, value] of formData.entries()) {
-        console.log(key, value);
       }
 
       // Handle file upload

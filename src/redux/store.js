@@ -8,6 +8,7 @@ import categoryReducer from "./features/categorySlice";
 import brandReducer from "./features/brandSlice";
 import reviewReducer from "./features/reviewSlice";
 import saleReducer from "./features/saleSlice";
+import recentlyViewedReducer from './features/recentlyViewedSlice';
 
 
 
@@ -20,7 +21,9 @@ export const store = configureStore({
     categories : categoryReducer,
      brands: brandReducer,
      reviews: reviewReducer, // Here, the reducer is named 'reviews'
-     sales: saleReducer
+     sales: saleReducer,
+     recentlyViewed: recentlyViewedReducer
+
   },
   devTools: process.env.NODE_ENV !== "production",
 });

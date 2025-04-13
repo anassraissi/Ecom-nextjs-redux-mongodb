@@ -15,7 +15,6 @@ function SaleList() {
   const dispatch = useDispatch();
   const salesData = useSelector((state) => state.sales);
   const sales = salesData.sales;
-  console.log(sales);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openPopup, setOpenPopup] = useState(false);

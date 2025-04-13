@@ -64,9 +64,7 @@ export async function PUT(req, { params }) {
 
     const { fields, files } = formData;
     const userId = session.user.id;
-    console.log('====================================');
-    console.log('fields', fields);
-    console.log('====================================');
+
 
     // Process images - match with their colors
     const images = fields.images?.map((url, index) => ({

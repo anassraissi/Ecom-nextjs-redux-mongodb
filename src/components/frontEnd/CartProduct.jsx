@@ -11,7 +11,6 @@ const CartProduct = ({ id, img, title, price, quantity, color }) => {
     const handleRemoveFromCart = (id) => {
         dispatch(removeFromCart(id));
     };
-
     return (
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
             <div className="flex items-center gap-4">
@@ -19,7 +18,7 @@ const CartProduct = ({ id, img, title, price, quantity, color }) => {
                     <Image
                         src={`/images/products/${img}`}
                         alt={title}
-                        layout="fill"
+                        layout="fill"   
                         objectFit="contain"
                         className="rounded-md"
                         onError={(e) => {

@@ -46,6 +46,7 @@ const Cart = ({ setShowCart }) => {
                                     <CartProduct
                                         id={item.id}
                                         img={item.img}
+                                        alt={item.title}
                                         title={item.title}
                                         price={item.price}
                                         quantity={item.quantity}

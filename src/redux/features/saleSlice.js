@@ -10,8 +10,6 @@ export const createSale = createAsyncThunk(
         method: 'POST',
         body: saleData, // Send FormData directly
       });
-      console.log('Sale data:', saleData);
-
       if (!response.ok) {
         try {
           const errorData = await response.json();

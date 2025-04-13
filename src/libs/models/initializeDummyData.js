@@ -48,7 +48,6 @@ export async function initializeDummyData() {
   // Insert dummy products since the collection is empty
   for (const product of dummyProducts) {
     await Product.create(product);
-    console.log(`Inserted product: ${product.name}`);
   }
 
   console.log("Dummy data initialization complete.");
